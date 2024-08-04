@@ -13,14 +13,60 @@ local width = currentFrame.width
 local height = currentFrame.height
 local output = {}
 
+-- Predefined set of hex color codes and their corresponding color names
+local colorNames = {
+  ["#FFFFFF"] = "white",
+  ["#000000"] = "black",
+  ["#FF0000"] = "red",
+  ["#00FF00"] = "green",
+  ["#0000FF"] = "blue",
+  ["#FFFF00"] = "yellow",
+  ["#FF00FF"] = "magenta",
+  ["#00FFFF"] = "cyan",
+  ["#800000"] = "maroon",
+  ["#808000"] = "olive",
+  ["#008000"] = "dark green",
+  ["#800080"] = "purple",
+  ["#008080"] = "teal",
+  ["#000080"] = "navy",
+  ["#FFA500"] = "orange",
+  ["#A52A2A"] = "brown",
+  ["#808080"] = "gray",
+  ["#C0C0C0"] = "silver",
+  -- Add more color names and hex codes as needed
+}
+
+-- Fallback function to approximate colors
+local function approximateColor(hexColor)
+  local closestName = "unknown"
+  local minDiff = math.huge
+  
+  for colorHex, colorName in pairs(colorNames) do
+    -- Convert hex to RGB
+    local r1, g1, b1 = tonumber(hexColor:sub(2, 3), 16), tonumber(hexColor:sub(4, 5), 16), tonumber(hexColor:sub(6, 7), 16)
+    local r2, g2, b2 = tonumber(colorHex:sub(2, 3), 16), tonumber(colorHex:sub(4, 5), 16), tonumber(colorHex:sub(6, 7), 16)
+    
+    -- Calculate the color difference
+    local diff = math.sqrt((r1 - r2)^2 + (g1 - g2)^2 + (b1 - b2)^2)
+    
+    if diff < minDiff then
+      minDiff = diff
+      closestName = colorName
+    end
+  end
+  
+  return closestName
+end
+
 -- Function to convert pixel color to readable format
 local function colorToString(color)
-  if color == 4294967295 then
-    return "white"
-  elseif color == 4278190080 then
-    return "black"
+  local hexColor = string.format("#%06X", color & 0xFFFFFF)
+  
+  -- Check if the color exists in the predefined names
+  if colorNames[hexColor] then
+    return colorNames[hexColor]  -- Return the name if it exists
   else
-    return string.format("#%08X", color)  -- Convert to hex format for other colors
+    return approximateColor(hexColor)  -- Return the closest color name if not found
   end
 end
 
